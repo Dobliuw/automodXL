@@ -11,15 +11,17 @@ First of all, I'm from Argentina so I understand that the possible users (if any
 So the structure of this project is pretty basic...
 
 - `requeriments.txt`: This is a file with all python modules needed to run correctly the script.
-- `main.py`: The script in question, which is responsible for consulting the current versions posted on the [Skatebit site](https://skatebit.vercel.app/mods), attempts to obtain all the mods for the version selected by the user from the Github project. Then... (This step is not yet complete, so if you're reading this, it's important to clarify that the IDEA is:) it attempts to download, depending on the selected version, the corresponding **Unity Mod Manager** along with each mod posted on the **Skatebit site** for that version. I would download them and save them in a downloads folder, then use the Unity Mod Manager to load them all for the Skater XL game (I'm still not sure if this type of functionality can be done from the console line).
+- `main.py`: The script in question, which is responsible for consulting the current versions posted on the [Skatebit site](https://skatebit.vercel.app/mods), attempts to obtain all the mods for the version selected by the user from the Github project. Then it attempts to download each mod to save them into a new folder called "**mods**" inside this repository directory. 
 
-Also, since this project was created for personal use, I would add an option to use "**default configurations**" (which are *Milky's stats*, *stances*, and *style*, which in my case I always used), since I never delved into configuration and customization in depth. I know a lot of people love to configure and customize their own stuff, so this step is optional, and if you don't select this option, you'd have to do it again manually.
+It's important to keep in mind that the *Unity Mod Manager* README doesn't have information about run this software from de `CLI`, even in the "*Install mods section*" their talk about `GUI`, so you will be hands on again in this point, opening the *UMM* and selecting all mods downloaded into the **mods** folder created in this level.
+
+Also, since this project was created for personal use, I would add an option to use "**default configurations**" (which are *Milky's stats*, *stances*, and *style*, which in my case I always used), since I never delved into configuration and customization in depth. I know a lot of people love to configure and customize their own stuff, so if you want, you can delete the default files found in the "**stats**", "**steeze**", "**fro-mod**" and "**stance**" directories and add your owns to then select the option to install the config files from the script.
 
 - `configurations`: Directory with default configurations.
     - `fro-mod/Settings.xml`: Custom fro mod settings shared in Milky's discord.
-    - `stance/Milky_October-2024_STANCE.xml`: Milky's October 2024 stances configuration shared in his discord.
-    - `stats/Milky_October-2024_STATS.xml`: Milky's October 2024 stats configuration shared in his discord.
-    - `steeze/Milky_October-2024_STEEZE.xml`: Milky's October 2024 steeze configuration shared in his discord.
+    - `stance/stance.xml`: Milky's October 2024 stances configuration shared in his discord.
+    - `stats/stats.xml`: Milky's October 2024 stats configuration shared in his discord.
+    - `steeze/steeze.xml`: Milky's October 2024 steeze configuration shared in his discord.
 
 -----
 
