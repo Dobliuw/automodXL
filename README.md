@@ -24,12 +24,45 @@ Also, since this project was created for personal use, I would add an option to 
     - `steeze/steeze.xml`: Milky's October 2024 steeze configuration shared in his discord.
 
 -----
+# Requirements
+- Python 3.8 or higher
+- [Playwright dependencies](https://playwright.dev/python/docs/intro#installation) (for browsers)
+- Git (optional, for cloning repositories)
+----
 
 # Installing dependencies
 
-A future section to install the needed dependencies walkthrough.
+This script use some python modules which are fundamentals to works, so you need just install the modules detailed in **requirements.txt** and the *browsers* for **playwright**.
+
+1. **Clone the repository**:
+
+```bash
+git clone "https://github.com/dobliuw/automodxl"
+cd automodXL
+```
+2. **Install the dependencies**:
+
+```bash
+pip3 install -r requeriments.txt
+```
+3. **Install Playwrigth browsers** (Required to get from **Skatebit webpage** the current SkaterXL versions plubished in the site):
+
+```bash
+python3 -m playwright install
+```
 
 ----
 # AutomodXL run
 
-A future section to show how the script works. 
+Finally you have all the necesary to run the script:
+
+```bash
+python3 main.py
+```
+
+🖥 Supported Platforms
+
+- ✅ Windows 10/11 (OneDrive-aware)
+- ✅ Linux (Steam via .steam or .local/share/Steam)
+- ⚠️ macOS (experimental support, not fully tested)
+
