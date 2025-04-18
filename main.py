@@ -1,7 +1,8 @@
-import requests, sys, re, signal, json, time, os, platform
+import requests, sys, re, signal, json, time, os, platform, shutil 
 from bs4 import BeautifulSoup
 from termcolor import colored
 from playwright.sync_api import sync_playwright
+from pathlib import Path
 from pwn import *
 
 # CTRL + C Declaration
@@ -47,7 +48,7 @@ def banner():
 		time.sleep(0.3)
 	#print(colored(banner, "green", attrs=["bold"]))
 	print(f"\t\t\t\t\t\tBy {colored("dobliuw", "green", attrs=["bold", "blink"])} X {colored("Skatebit", "yellow", attrs=["bold", "blink"])} ;)\n\n")
-	time.sleep(3)
+	time.sleep(4)
 	clear_screen()
 
 
@@ -100,7 +101,7 @@ def sanitize_strings_to_filenames(string):
     string = re.sub(r'_+', '_', string)
 	# Avoid starting and ending with underscores
     string = string.strip('_')
-    return string
+    return string + ".zip"
 
 def get_versions():
 	global versions
@@ -162,7 +163,7 @@ def get_mods(version):
 				print(colored(f"\t\t- {mod['downloadLinks'][0]['url']}\n", "blue", attrs=["underline", "bold"]))
 				time.sleep(0.7)
 				
-			time.sleep(2)
+			time.sleep(4)
 			clear_screen()
 
 		else:
@@ -173,43 +174,55 @@ def get_mods(version):
 		print(f"\n{colored("[!]", "red")} Error fetching data: {e}")
 		sys.exit(1)
 
-
 def download_mods(mods):
 	global non_downloadable_mods
-	download_pb = log.progress(f"{colored("[i]", "blue", attrs=["bold"])} Downloading mods...")
+
+	print(f"\n{colored('[i]', 'blue', attrs=['bold'])} Downloading mods...\n")
+	#download_pb = log.progress(f"{"[i]"} Downloading mods...")
 	time.sleep(2)
+	clear_screen()
+
+	# Create the directory if it doesn't exist
+	if not os.path.exists("mods"):
+		os.makedirs("mods")
+
 	for mod in mods:
 		try:
 			# Get the mod name and download link (Shared in skatebit web)
 			mod_name = mod['name']
 			mod_link = mod['url']
-			# Update the progress bar with the mod name
-			download_pb.status(f"{colored(mod_name, 'yellow')}")
-			time.sleep(0.5)
+
 			# Parse the mod name to a valid filename
-			filename = sanitize_strings_to_filenames(mod_name) + ".zip"
-			# Create the directory if it doesn't exist
-			if not os.path.exists("mods"):
-				os.makedirs("mods")
+			filename = sanitize_strings_to_filenames(mod_name)
+			
+			# Check if the file already exists in the mods directory
+			if os.path.exists(f"mods/{filename}"):	
+				# If the file already exists, skip the download and update the progress bar
+				print(f"\t{colored('[i]', 'blue', attrs=["bold"])} Mod {colored(mod_name, 'yellow', attrs=['bold'])} already downloaded in mod folder, skipping download.")
+				time.sleep(0.5)
+				continue # Skip the download if the file already exists
+
 			# Download the mod
+			print(f"\t{colored('[+]', 'green')} Downloading {colored(mod_name, "yellow", attrs=["bold"])} Mod...")
 			response = requests.get(mod_link, headers=headers)
+			
 			#  Check if the server responded with a 200 status code
 			if response.status_code == 200:
 				# Save the mod to the mods directory
 				with open(f"mods/{filename}", "wb") as file:
 					file.write(response.content)
-				# Update the progress bar with a success message
-				download_pb.success(f"Mod {colored(mod_name, 'yellow')} downloaded successfully.")
+
 			else:
 				# If the server responded with a diferent 200 status code, it means the mod is not available for download
-				download_pb.failure(f"Mod {colored(mod_name, 'yellow')} failed to download.")
+				download_pb.failure(f"Mod {mod_name} failed to download.")
+				print(f"mod {mod_name} failed to download.")
 				# Track the non-downloable mod
 				non_downloadable_mods.append({"name": mod_name, "url": mod_link})
 			time.sleep(0.5)
 
 		except Exception as e:
-			# If an error occurs, update the progress bar with a failure message.
-			download_pb.failure(f"Mod {colored(mod_name, 'yellow')} failed to download.")
+			# If an error occurs during the download, print the error message and track the non-downloadable mod
+			print(f"{colored("[!]", "red")} Mod {mod_name} failed to download.")
 			# Track the non-downloable mod
 			non_downloadable_mods.append({"name": mod_name, "url": mod_link})
 			print(f"\n{colored('[!]', 'red')} Error downloading {mod_name}: {e}")
@@ -217,11 +230,142 @@ def download_mods(mods):
 			continue
 
 
+def save_configs():
+	global operative_system
+
+	# clear the screen
+	clear_screen()
+
+	print(f"\n\t{colored("[i]", "blue")} Saving configs...\n")
+	time.sleep(2)
+	# If the user is using Windows, get the possible OneDrive path from the environment variable
+	onedrive_path = os.environ.get("OneDrive")
+
+	# Trying to get the Skater XL path to save the configs
+	if onedrive_path:
+		skaterxl_path = Path(onedrive_path) / "Documents" / "SkaterXL"
+		# If the path doesn't exist, try the "Documentos" folder (Spanish version of Documents)
+		if not os.path.exists(skaterxl_path):
+			skaterxl_path = Path(onedrive_path) / "Documentos" / "SkaterXL"
+	else:
+		skaterxl_path = Path.home() / "Documents" / "SkaterXL"
+		# If the path doesn't exist, try the "Documentos" folder (Spanish version of Documents)
+		if not os.path.exists(skaterxl_path):
+			skaterxl_path = Path.home() / "Documentos" / "SkaterXL"
+
+	if os.path.exists(skaterxl_path):
+		print(f"\n{colored('[+]', 'green')} Saving configs to {colored(skaterxl_path, 'yellow', attrs=['bold'])}...\n")
+	else:
+		# If the path doesn't exist, ask the user to insert it manually
+		path = input(f"\n{colored('[!]', 'red')} Skater XL path not found. Please insert your path manually if you known it (Ex. C:\\Users\\dobliuw\\Documents\\SkaterXL\\): .\n")
+		if os.path.exists(path):
+			skaterxl_path = Path(path)
+		else:
+			print(f"\n{colored('[!]', 'red')} Skater XL path inserted not found, please check it.\n")
+			sys.exit(1)
+
+	# Set the destination 
+	src_path = Path.cwd() / "configurations"
+	dst_path = skaterxl_path / "XXLMod3"
+
+	# Create the destination directory if it doesn't exist
+	(dst_path / "StatsCollections").mkdir(parents=True, exist_ok=True)
+	(dst_path / "StanceCollections").mkdir(parents=True, exist_ok=True)
+	(dst_path / "SteezeCollections").mkdir(parents=True, exist_ok=True)
+
+	print(f"\t{colored("[i]", "blue", attrs=["bold"])} Trying to leave config files into {colored(dst_path, "yellow", attrs=["bold"])}...")
+	time.sleep(1)
+
+	# Check if the source files exist before moving them
+	if not (src_path  / "stats" / "stats.xml").exists():
+		print(f"\n\n\t{colored('[!]', 'red')} Missing config file in mod folder. {colored(src_path  / "stats" / "stats.xml", "red")}\n")
+		sys.exit(1)
+	elif not (src_path / "stance" / "stance.xml").exists():
+		print(f"\n\n\t{colored('[!]', 'red')} Missing config file in mod folder. {colored(src_path  / "stance" / "stance.xml", "red")}\n")
+		sys.exit(1)
+	elif not (src_path / "steeze" / "steeze.xml").exists():
+		print(f"\n\n\t{colored('[!]', 'red')} Missing config file in mod folder. {colored(src_path  / "steeze" / "steeze.xml", "red")}\n")
+		sys.exit(1)
+	
+	# Move the files to the destination directory if they don't exist
+	if not (dst_path / "StatsCollections" / "stats.xml").exists():
+		# Move the stats.xml file to the destination directory if it doesn't exist
+		shutil.move(str(src_path / "stats" / "stats.xml"), str(dst_path / "StatsCollections" / "stats.xml"))
+		print(f"\t{colored('[+]', 'green')} Config file {colored('stats.xml', 'yellow', attrs=['bold'])} moved to {colored(dst_path / 'StatsCollections', 'yellow', attrs=['bold'])}...\n")
+	
+	elif (dst_path / "StanceCollections" / "stance.xml").exists():
+		# Move the stance.xml file to the destination directory if it doesn't exist
+		shutil.move(str(src_path / "stance" / "stance.xml"), str(dst_path / "StanceCollections" / "stance.xml"))
+		print(f"\t{colored('[+]', 'green')} Config file {colored('stance.xml', 'yellow', attrs=['bold'])} moved to {colored(dst_path / 'StanceCollections', 'yellow', attrs=['bold'])}...\n")
+	
+	elif (dst_path / "SteezeCollections" / "steeze.xml").exists():
+		# Move the steeze.xml file to the destination directory if it doesn't exist
+		shutil.copy(str(src_path / "steeze" / "steeze.xml"), str(dst_path / "SteezeCollections" / "steeze.xml"))
+		print(f"\t{colored('[+]', 'green')} Config file {colored('steeze.xml', 'yellow', attrs=['bold'])} moved to {colored(dst_path / 'SteezeCollections', 'yellow', attrs=['bold'])}...\n")
+	else:
+		print(f"\n\n\t{colored('[i]', 'blue', attrs=["bold"])} Config files for stats, stance and steeze already found in {colored(dst_path, 'yellow', attrs=["bold"])}\n")
+	
+	# Set the destination 
+	src_path = Path.cwd() / "configurations"	
+	dst_path = Path("")
+	
+	# Try to detect the steamapps path to move the settings.xml file
+	if operative_system == "Windows":
+		dst_path = Path(os.environ.get("ProgramFiles(x86)", "C:/Program Files (x86)")) / "Steam" / "steamapps" / "common" / "SkaterXL" / "Mods" / "fro-mod"
+		if not dst_path.exists():
+			dst_path = Path(os.environ.get("ProgramFiles(x86)", "C:/Program Files (x86)")) / "Steam" / "steamapps" / "common" / "Skater XL" / "Mods" / "fro-mod"
+	else:
+		# If the user is using Linux, get the possible Steam path from the environment variable
+		dst_path = Path.home() / ".steam" / "steam" 
+		# If the path doesn't exist, try another possible path
+		if not dst_path.exists():
+			dst_path = Path.home() / ".local" / "share" / "Steam" / "steamapps" / "common" / "SkaterXL" / "Mods" / "fro-mod"
+			if not dst_path.exists():
+				dst_path = Path.home() / ".local" / "share" / "Steam" / "steamapps" / "common" / "Skater XL" / "Mods" / "fro-mod"
+	
+	default_steam_path = Path(os.environ.get("ProgramFiles(x86)", "C:/Program Files (x86)")) / "Steam" 
+	# Declare the libraryfolders.vdf path (File that contains the paths of all the libraries)
+	library_vdf = default_steam_path / "steamapps" / "libraryfolders.vdf"
+
+	# Open the libraryfolders.vdf file to get the possible paths
+	with open(library_vdf, encoding="utf-8") as f:
+		content = f.read()
+
+	# Find all the paths in the libraryfolders.vdf file
+	paths = re.findall(r'"\d+"\s*\{\s*"path"\s*"([^"]+)"', content)
+	possible_paths = [Path(path.strip().replace("\\\\", "\\")) / "steamapps" / "common" / "SkaterXL" for path in paths]
+	possible_paths += [Path(path.strip().replace("\\\\", "\\")) / "steamapps" / "common" / "Skater XL" for path in paths]
+
+	# add the default steam path to the possible paths
+	if (default_steam_path / "steamapps" / "common" / "SkaterXL") not in possible_paths:
+		possible_paths.insert(0, default_steam_path / "steamapps" / "common" / "SkaterXL")
+	if (default_steam_path / "steamapps" / "common" / "Skater XL") not in possible_paths:
+		possible_paths.insert(0, default_steam_path / "steamapps" / "common" / "Skater XL")
+
+	# Check if the path exists and set the destination path
+	for path in possible_paths:
+		if path.exists():
+			dst_path = path / "Mods" / "fro-mod"
+			break
+
+	print(f"\n\t{colored("[i]", "blue", attrs=["bold"])} Trying to leave fro-mod config files into {colored(dst_path, "yellow", attrs=["bold"])}...")
+	time.sleep(1)
+	 
+	if not (dst_path / "Settings.xml").exists():
+		# Create the destination directory if it doesn't exist
+		(dst_path).mkdir(parents=True, exist_ok=True)
+		# Move the settings.xml file to the destination directory if it exists
+		shutil.copy(str(src_path / "fro-mod" / "Settings.xml"), str(dst_path / "Settings.xml"))
+		print(f"\t{colored('[+]', 'green')} Config file {colored('Settings.xml', 'yellow', attrs=['bold'])} moved to {colored(dst_path, 'yellow', attrs=['bold'])}...\n")
+	else:
+		print(f"\n\n\t{colored('[i]', 'blue', attrs=["bold"])} Config file already found in {colored(src_path  / 'fro-mod/Settings.xml', 'yellow', attrs=["bold"])}\n")
+
+
 if __name__ == "__main__":
 	clear_screen()
 	banner()
 	get_versions()
-	print(f"{colored("[+]", "green")} The following versions of Skater XL were found\n")
+	print(f"{colored("[+]", "green")} The following versions of Skater XL were found:\n")
 	
 	# Print the versions found in the webpage
 	for index, version in enumerate(versions):
@@ -249,3 +393,12 @@ if __name__ == "__main__":
 
 	get_mods(base_version)
 	download_mods(mods_to_download)
+	save_configs()
+	
+	print (f"\n\t{colored('[+]', 'green')} All mods downloaded and configs saved successfully!")
+	time.sleep(2)
+	print (f"\tIf you have any problem, please open an issue in the GitHub repository.")
+	time.sleep(2)
+	print (f"\tAlso if you want to contribute, please open a pull request.")
+	time.sleep(4)
+	print(f"\n\t{colored('[i]', 'blue', attrs=['bold'])} Thanks for using {colored('AutomodXL', 'yellow', attrs=['bold'])}!\n")
