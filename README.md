@@ -11,7 +11,7 @@ First of all, I'm from Argentina so I understand that the possible users (if any
 So the structure of this project is pretty basic...
 
 - `requeriments.txt`: This is a file with all python modules needed to run correctly the script.
-- `main.py`: The script in question, which is responsible for consulting the current versions posted on the [Skatebit site](https://skatebit.vercel.app/mods), attempts to obtain all the mods for the version selected by the user from the Github project. Then it attempts to download each mod to save them into a new folder called "**mods**" inside this repository directory. 
+- `main.py`: The script in question, which is responsible for consulting the current Skater XL versions posted on the [Skatebit site](https://skatebit.vercel.app/mods), attempts to obtain all the mods for the version selected by the user from the Github project. Then it attempts to download each mod to save them into a new folder called "**mods**" inside this repository directory. 
 
 It's important to keep in mind that the *Unity Mod Manager* README doesn't have information about run this software from de `CLI`, even in the "*Install mods section*" their talk about `GUI`, so you will be hands on again in this point, opening the *UMM* and selecting all mods downloaded into the **mods** folder created in this level.
 
