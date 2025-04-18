@@ -22,7 +22,11 @@ versions = []
 mods_to_download = []
 non_downloadable_mods = []
 operative_system = platform.system()
+stats = True
+stance = True
+steeze = True
 
+# Function to clear the screen
 def clear_screen():
 	global operative_system
 	# Clear the screen based on the operating system
@@ -31,7 +35,7 @@ def clear_screen():
 	else:
 		os.system("clear")
 
-
+# Function to print the banner
 def banner():
 	print("\n\n")
 	banner=r"""
@@ -48,8 +52,25 @@ def banner():
 		time.sleep(0.3)
 	#print(colored(banner, "green", attrs=["bold"]))
 	print(f"\t\t\t\t\t\tBy {colored("dobliuw", "green", attrs=["bold", "blink"])} X {colored("Skatebit", "yellow", attrs=["bold", "blink"])} ;)\n\n")
-	time.sleep(4)
+	time.sleep(5)
 	clear_screen()
+
+def goodbye(configs):
+
+	if configs:
+		print (f"\n{colored('[+]', 'green')} All mods downloaded and configs saved successfully!")
+	else:
+		print (f"\n{colored('[+]', 'green')} All mods downloaded successfully!")
+	time.sleep(2)
+	print (f"If you have any problem, please open an issue in the GitHub repository.")
+	time.sleep(2)
+	print (f"Also if you want to contribute, please open a pull request.")
+	time.sleep(4)
+	print(f"\t\n{colored('[i]', 'blue', attrs=['bold'])} Thanks for using {colored('AutomodXL', 'yellow', attrs=['bold'])}!\n")
+	print(colored("\n////////////////////////////////////////////////////////////////////////////////////////////////", "red", attrs=["bold"]))
+	print(f"{colored("/////////", "red", attrs=["bold"])}    Don't forget open manually the Unity Mod Manager and install all mods     {colored("/////////", "red", attrs=["bold"])}\n{colored("/////////", "red", attrs=["bold"])}  downloaded in mods folder manually (I'm srry this cant be does from here)   {colored("/////////", "red", attrs=["bold"])}")
+	print(colored("////////////////////////////////////////////////////////////////////////////////////////////////\n", "red", attrs=["bold"]))
+	sys.exit(0)
 
 
 def parse_array_str_to_json(array_str):
@@ -180,7 +201,6 @@ def download_mods(mods):
 	print(f"\n{colored('[i]', 'blue', attrs=['bold'])} Downloading mods...\n")
 	#download_pb = log.progress(f"{"[i]"} Downloading mods...")
 	time.sleep(2)
-	clear_screen()
 
 	# Create the directory if it doesn't exist
 	if not os.path.exists("mods"):
@@ -231,7 +251,7 @@ def download_mods(mods):
 
 
 def save_configs():
-	global operative_system
+	global operative_system, stats, stance, steeze
 
 	# clear the screen
 	clear_screen()
@@ -273,7 +293,7 @@ def save_configs():
 	(dst_path / "StanceCollections").mkdir(parents=True, exist_ok=True)
 	(dst_path / "SteezeCollections").mkdir(parents=True, exist_ok=True)
 
-	print(f"\t{colored("[i]", "blue", attrs=["bold"])} Trying to leave config files into {colored(dst_path, "yellow", attrs=["bold"])}...")
+	print(f"\t{colored("[i]", "blue", attrs=["bold"])} Trying to leave config files into {colored(dst_path, "yellow", attrs=["bold"])}...\n")
 	time.sleep(1)
 
 	# Check if the source files exist before moving them
@@ -289,20 +309,24 @@ def save_configs():
 	
 	# Move the files to the destination directory if they don't exist
 	if not (dst_path / "StatsCollections" / "stats.xml").exists():
+		stats = False
 		# Move the stats.xml file to the destination directory if it doesn't exist
-		shutil.move(str(src_path / "stats" / "stats.xml"), str(dst_path / "StatsCollections" / "stats.xml"))
-		print(f"\t{colored('[+]', 'green')} Config file {colored('stats.xml', 'yellow', attrs=['bold'])} moved to {colored(dst_path / 'StatsCollections', 'yellow', attrs=['bold'])}...\n")
+		shutil.copy(str(src_path / "stats" / "stats.xml"), str(dst_path / "StatsCollections" / "stats.xml"))
+		print(f"{colored('[+]', 'green')} Config file {colored('stats.xml', 'yellow', attrs=['bold'])} moved to {colored(dst_path / 'StatsCollections', 'yellow', attrs=['bold'])}...\n")
 	
-	elif (dst_path / "StanceCollections" / "stance.xml").exists():
+	if not (dst_path / "StanceCollections" / "stance.xml").exists():
+		stance = False
 		# Move the stance.xml file to the destination directory if it doesn't exist
-		shutil.move(str(src_path / "stance" / "stance.xml"), str(dst_path / "StanceCollections" / "stance.xml"))
-		print(f"\t{colored('[+]', 'green')} Config file {colored('stance.xml', 'yellow', attrs=['bold'])} moved to {colored(dst_path / 'StanceCollections', 'yellow', attrs=['bold'])}...\n")
+		shutil.copy(str(src_path / "stance" / "stance.xml"), str(dst_path / "StanceCollections" / "stance.xml"))
+		print(f"{colored('[+]', 'green')} Config file {colored('stance.xml', 'yellow', attrs=['bold'])} moved to {colored(dst_path / 'StanceCollections', 'yellow', attrs=['bold'])}...\n")
 	
-	elif (dst_path / "SteezeCollections" / "steeze.xml").exists():
+	if not (dst_path / "SteezeCollections" / "steeze.xml").exists():
+		steeze = False
 		# Move the steeze.xml file to the destination directory if it doesn't exist
 		shutil.copy(str(src_path / "steeze" / "steeze.xml"), str(dst_path / "SteezeCollections" / "steeze.xml"))
-		print(f"\t{colored('[+]', 'green')} Config file {colored('steeze.xml', 'yellow', attrs=['bold'])} moved to {colored(dst_path / 'SteezeCollections', 'yellow', attrs=['bold'])}...\n")
-	else:
+		print(f"{colored('[+]', 'green')} Config file {colored('steeze.xml', 'yellow', attrs=['bold'])} moved to {colored(dst_path / 'SteezeCollections', 'yellow', attrs=['bold'])}...\n")
+	
+	if stats and stance and steeze:
 		print(f"\n\n\t{colored('[i]', 'blue', attrs=["bold"])} Config files for stats, stance and steeze already found in {colored(dst_path, 'yellow', attrs=["bold"])}\n")
 	
 	# Set the destination 
@@ -348,7 +372,7 @@ def save_configs():
 			dst_path = path / "Mods" / "fro-mod"
 			break
 
-	print(f"\n\t{colored("[i]", "blue", attrs=["bold"])} Trying to leave fro-mod config files into {colored(dst_path, "yellow", attrs=["bold"])}...")
+	print(f"\t{colored("[i]", "blue", attrs=["bold"])} Trying to leave fro-mod config files into {colored(dst_path, "yellow", attrs=["bold"])}...")
 	time.sleep(1)
 	 
 	if not (dst_path / "Settings.xml").exists():
@@ -393,12 +417,15 @@ if __name__ == "__main__":
 
 	get_mods(base_version)
 	download_mods(mods_to_download)
-	save_configs()
+
+	# Ask the user if he wants to save the configs
+	print(f"\n{colored('[!]', 'magenta', attrs=['bold'])} In this point you have downloaded all the mods for the version {colored(version_selected, "yellow", attrs=["bold"])} in the {colored("./mods", "yellow", attrs=["bold"])} folder...\n")
+	config_save = str(input(f"\t{colored('[?]', 'magenta', attrs=['bold'])} Do you want to save the configs for the mods? (y/n): ").lower())
+
+	if config_save != "y":
+		print(f"\n{colored('[i]', 'blue', attrs=['bold'])} Skipping configs saving...\n")
+	else:
+		# If the user wants to save the configs, call the save_configs function	
+		save_configs()
+	goodbye(True if config_save == "y" else False)
 	
-	print (f"\n\t{colored('[+]', 'green')} All mods downloaded and configs saved successfully!")
-	time.sleep(2)
-	print (f"\tIf you have any problem, please open an issue in the GitHub repository.")
-	time.sleep(2)
-	print (f"\tAlso if you want to contribute, please open a pull request.")
-	time.sleep(4)
-	print(f"\n\t{colored('[i]', 'blue', attrs=['bold'])} Thanks for using {colored('AutomodXL', 'yellow', attrs=['bold'])}!\n")
